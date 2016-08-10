@@ -8,6 +8,7 @@
 (def INVALID_TRAILING_CHARS #"[\. ]+$")
 (def UNICODE_WHITESPACE #"\p{Space}")
 (def WINDOWS_RESERVED_NAMES #"^(?i)(CON|PRN|AUX|NUL|COM[1-9]|LPT[1-9])(\..*)?$")
+(def RESERVED_NAMES #"^\.+$")
 (def FALLBACK_FILENAME "file")
 
 (defn- normalize [filename]
@@ -29,9 +30,9 @@
     )
   )
 
-(defn- filter-dot [filename]
-  (if (.startsWith filename ".")
-    (str FALLBACK_FILENAME filename)
+(defn- filter-reserved-names [filename]
+  (if (re-matches RESERVED_NAMES filename)
+    FALLBACK_FILENAME
     filename
     )
   )
@@ -44,9 +45,10 @@
 (defn- -filter [filename]
   (-> filename
       filter-windows-reserved-names
+      filter-reserved-names
       filter-blank
-      filter-dot
-      filter-invalid-trailing-chars)
+      filter-invalid-trailing-chars
+      )
   )
 
 (defn- -sanitize [filename]
